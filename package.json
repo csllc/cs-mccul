@@ -1,0 +1,11 @@
+{
+  "name": "cs-mccul",
+  "version": "0.0.1",
+  "description": "MCC Universal Library module for NodeJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Calvin Walden <cwalden@controls.com>",
+  "license": "MIT"
+}
