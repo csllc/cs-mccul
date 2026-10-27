@@ -27,5 +27,8 @@
     "type": "git",
     "url": "https://github.com/csllc/cs-mccul.git"
   },
-  "gypfile": true
+  "gypfile": true,
+  "devDependencies": {
+    "node-api-headers": "^1.9.0"
+  }
 }

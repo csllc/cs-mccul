@@ -1,0 +1,7 @@
+-Inode_modules/node-api-headers/include
+-Ivendor/uldaq/src
+-DNODE_GYP_MODULE_NAME=cs_mccul
+-DBUILDING_NODE_EXTENSION
+-Wall
+-Wextra
+-Wno-unused-parameter
