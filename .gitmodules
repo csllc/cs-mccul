@@ -1,0 +1,3 @@
+[submodule "vendor/uldaq"]
+	path = vendor/uldaq
+	url = https://github.com/mccdaq/uldaq
