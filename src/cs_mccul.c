@@ -152,10 +152,12 @@ napi_value mccul_getDaqDeviceInventory(napi_env env, napi_callback_info info)
 	UlError err = ERR_NO_ERROR;
     err = ulGetDaqDeviceInventory(ul_interfaceType, ul_devDescriptors, &ul_numDevs);
 
-    if (err == ERR_NO_ERROR)
+    if (err != ERR_NO_ERROR)
     {
         mcculPrintError(err);
-        napi_throw_error(env, (const char*)&err, "Error encountered at ulGetDaqDeviceInventory");
+        char errCode[16];
+        snprintf(errCode, sizeof(errCode), "%d", err);
+        napi_throw_error(env, errCode, "Error encountered at ulGetDaqDeviceInventory");
         return 0;
         
     }

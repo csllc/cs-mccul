@@ -15,6 +15,9 @@
             "include_dirs": [
               "vendor/uldaq/src"
             ],
+            "libraries": [
+              "-luldaq"
+            ],
           }
         ]
       ]
