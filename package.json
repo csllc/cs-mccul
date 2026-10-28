@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "install": "node-gyp-build",
+    "build": "node-gyp build",
     "rebuild": "node-gyp rebuild",
-    "prebuild:x64": "prebuildify --napi --strip --arch x64",
-    "prebuild:arm64": "CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ LINK=aarch64-linux-gnu-g++ AR=aarch64-linux-gnu-ar prebuildify --napi --arch arm64",
-    "prebuild": "npm run prebuild:x64 && npm run prebuild:arm64",
+    "prebuildify:x64": "prebuildify --napi --strip --arch x64",
+    "prebuildify:arm64": "CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ LINK=aarch64-linux-gnu-g++ AR=aarch64-linux-gnu-ar prebuildify --napi --arch arm64",
+    "prebuildify": "npm run prebuildify:x64 && npm run prebuildify:arm64",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Calvin Walden <cwalden@controls.com>",
