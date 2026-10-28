@@ -9,6 +9,7 @@
 #include <stdio.h>    // provide printf and snprintf
 #include <node_api.h> // provide N-API constants, types, functions
 #include <stdint.h>   // provide uintX_t
+#include <inttypes.h> // provide PRIX64, PRId64
 #include <string.h>   // provide strncpy
 
 #include "common_helper.h" // provide lookupString and lookup_t
@@ -108,6 +109,7 @@ void napiDumpValue(napi_env env, napi_value value, char* name)
     int64_t napiValueInt64 = 0;
     char napiValueStringBuffer[128] = {0};
     size_t napiValueStringResult = 0;
+    bool napiValueLossless = 0;
     void* napiValueExternalPtr = 0;
 
     // Build value string in buffer
@@ -138,8 +140,23 @@ void napiDumpValue(napi_env env, napi_value value, char* name)
             printf("napiDumpValue: Error at napi_get_value_int64: %s",
                    napiStatusLookup(status));
         }
-        snprintf(napiValueBuffer, sizeof(napiValueBuffer), "0x%llX = %lli",
+        snprintf(napiValueBuffer, sizeof(napiValueBuffer),
+                 "0x%" PRIX64 " = %" PRId64,
                  (uint64_t)napiValueInt64, napiValueInt64);
+        break;
+    case napi_bigint:
+        // Show as int64; flag values that don't fit
+        status = napi_get_value_bigint_int64(env, value, &napiValueInt64,
+                                             &napiValueLossless);
+        if (status != napi_ok)
+        {
+            printf("napiDumpValue: Error at napi_get_value_bigint_int64: %s",
+                   napiStatusLookup(status));
+        }
+        snprintf(napiValueBuffer, sizeof(napiValueBuffer),
+                 "0x%" PRIX64 " = %" PRId64 "n%s",
+                 (uint64_t)napiValueInt64, napiValueInt64,
+                 napiValueLossless ? "" : " (truncated)");
         break;
     case napi_string:
         status = napi_get_value_string_utf8(env,
