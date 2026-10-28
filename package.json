@@ -4,31 +4,27 @@
   "description": "MCC Universal Library module for NodeJS",
   "main": "index.js",
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "node-gyp-build",
+    "rebuild": "node-gyp rebuild",
+    "prebuild:x64": "prebuildify --napi --strip --arch x64",
+    "prebuild:arm64": "CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ LINK=aarch64-linux-gnu-g++ AR=aarch64-linux-gnu-ar prebuildify --napi --arch arm64",
+    "prebuild": "npm run prebuild:x64 && npm run prebuild:arm64",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Calvin Walden <cwalden@controls.com>",
   "license": "MIT",
   "dependencies": {
-    "bindings": "~1.2.1",
-    "eslint": "^7.10.0",
-    "node-gyp": "^7.1.1",
-    "node-pre-gyp": "^0.15.0",
-    "stream": "0.0.2"
+    "node-gyp-build": "^4.8.0"
   },
-  "binary": {
-    "module_name": "cs_mccul",
-    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
-    "module_path": "./binding/{configuration}/{node_abi}-{platform}-{arch}/",
-    "host": "https://github.com/csllc/cs-mccul-binding/releases/download/",
-    "remote_path": "{version}"
+  "devDependencies": {
+    "eslint": "^7.10.0",
+    "node-api-headers": "^1.9.0",
+    "node-gyp": "^11.0.0",
+    "prebuildify": "^6.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/csllc/cs-mccul.git"
   },
-  "gypfile": true,
-  "devDependencies": {
-    "node-api-headers": "^1.9.0"
-  }
+  "gypfile": true
 }

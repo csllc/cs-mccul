@@ -1,14 +1,12 @@
 'use strict';
 
-const binary = require('node-pre-gyp');
-const path = require('path');
-
 const { Duplex } = require('stream');
 
 const mcculConst = require('./lib/mcculConst');
 
-const mccul_path = binary.find(path.resolve(path.join(__dirname,'./package.json')));
-const mccul = require(mccul_path);
+// Load the native addon: prebuilds/<platform>-<arch>/ if a matching prebuild
+// is present, otherwise build/Release (or build/Debug)
+const mccul = require('node-gyp-build')(__dirname);
 
 module.exports = class MccUl extends Duplex {
   constructor(options) {

@@ -150,4 +150,4 @@ vite.config.ts.timestamp-*
 
 # node-gyp stuff
 build/
-binding/
+prebuilds/
