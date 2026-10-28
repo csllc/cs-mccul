@@ -11,6 +11,7 @@
 #include <node_api.h>    // provide N-API types, constants, and functions
 #include <stdio.h>       // provide printf
 #include <stdint.h>      // provide uintX_t
+#include <string.h>      // provide strnlen
 
 /* #include <windows.h>     // provide Win32 types, constants, and functions */
 
@@ -174,8 +175,8 @@ napi_value mccul_getDaqDeviceInventory(napi_env env, napi_callback_info info)
     napi_value devDescriptorElement_uniqueId; // char[64]
     // napi_value devDescriptorElement_reserved;
 
-    // Add applicable channels (based on type) to N-API object
-    int i;
+    // Add one object per device to the N-API array
+    unsigned int i;
     for (i = 0; i < ul_numDevs; i++)
     {
 #ifdef MCCUL_DEBUG
@@ -188,9 +189,39 @@ napi_value mccul_getDaqDeviceInventory(napi_env env, napi_callback_info info)
 
         // Assign properties
         // - Product name
-        status = napi_create_string_utf8(env, ul_devDescriptors[i].productName, NAPI_AUTO_LENGTH, &devDescriptorElement_productName);
+        status = napi_create_string_utf8(env, ul_devDescriptors[i].productName,
+                                         strnlen(ul_devDescriptors[i].productName, sizeof(ul_devDescriptors[i].productName)),
+                                         &devDescriptorElement_productName);
         assert(status == napi_ok);
         status = napi_set_named_property(env, devDescriptorElement, "productName", devDescriptorElement_productName);
+        assert(status == napi_ok);
+
+        // - Product ID
+        status = napi_create_uint32(env, ul_devDescriptors[i].productId, &devDescriptorElement_productId);
+        assert(status == napi_ok);
+        status = napi_set_named_property(env, devDescriptorElement, "productId", devDescriptorElement_productId);
+        assert(status == napi_ok);
+
+        // - Interface type (DaqDeviceInterface value, see lib/mcculConst.js)
+        status = napi_create_int32(env, (int32_t)ul_devDescriptors[i].devInterface, &devDescriptorElement_devInterface);
+        assert(status == napi_ok);
+        status = napi_set_named_property(env, devDescriptorElement, "devInterface", devDescriptorElement_devInterface);
+        assert(status == napi_ok);
+
+        // - Device string
+        status = napi_create_string_utf8(env, ul_devDescriptors[i].devString,
+                                         strnlen(ul_devDescriptors[i].devString, sizeof(ul_devDescriptors[i].devString)),
+                                         &devDescriptorElement_devString);
+        assert(status == napi_ok);
+        status = napi_set_named_property(env, devDescriptorElement, "devString", devDescriptorElement_devString);
+        assert(status == napi_ok);
+
+        // - Unique ID (serial number or MAC address)
+        status = napi_create_string_utf8(env, ul_devDescriptors[i].uniqueId,
+                                         strnlen(ul_devDescriptors[i].uniqueId, sizeof(ul_devDescriptors[i].uniqueId)),
+                                         &devDescriptorElement_uniqueId);
+        assert(status == napi_ok);
+        status = napi_set_named_property(env, devDescriptorElement, "uniqueId", devDescriptorElement_uniqueId);
         assert(status == napi_ok);
 
         // Add complete element to array
