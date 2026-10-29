@@ -1,0 +1,137 @@
+# Build prebuilt binaries for linux-x64 and linux-arm64, then publish the
+# package to npm with both binaries included.
+#
+# Triggered by pushing a version tag, e.g.:
+#   npm version patch      # bumps package.json and creates tag vX.Y.Z
+#   git push --follow-tags
+#
+# Publishing uses npm trusted publishing (OIDC), so no npm token is stored in
+# GitHub. The trusted publisher on npmjs.com must name this repository and the
+# workflow file "release.yml".
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build linux-${{ matrix.arch }}
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+
+    # Build on the oldest supported OS (Debian 12, glibc 2.36). A binary only
+    # loads on systems with a glibc at least as new as the one it was built
+    # against, so this keeps the binaries compatible with Debian 12 and later
+    # (including Raspberry Pi OS Bookworm).
+    container: debian:bookworm
+
+    steps:
+      # git is needed in the container for checkout to fetch the submodule
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates git build-essential python3 libusb-1.0-0-dev
+
+      - name: Check out repository and uldaq submodule
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      # --ignore-scripts skips the package's own install script, which would
+      # otherwise compile the module (prebuildify compiles it below)
+      - name: Install npm dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build prebuilt binary
+        run: npx prebuildify --napi --strip
+
+      # Load the prebuilt binary (not build/Release) to check that it links
+      # and initializes, and that the expected functions are exported. No DAQ
+      # hardware is available, so nothing talks to a device.
+      - name: Check that the binary loads
+        run: |
+          rm -rf build
+          ls -l prebuilds/*/
+          node -e "
+            const native = require('node-gyp-build')(process.cwd());
+            for (const fn of ['GetDaqDeviceInventory', 'AIn', 'AInScan', 'DIn', 'CIn', 'DaqInScan']) {
+              if (typeof native[fn] !== 'function') throw new Error(fn + ' not exported');
+            }
+            require('.');
+            console.log('OK:', Object.keys(native).length, 'native functions');
+          "
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v7
+        with:
+          name: prebuilds-linux-${{ matrix.arch }}
+          path: prebuilds/
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    needs: build
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      id-token: write   # required for npm trusted publishing
+
+    steps:
+      # The submodule is included so the published package can still be
+      # compiled from source on platforms without a prebuilt binary
+      - name: Check out repository and uldaq submodule
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm 11.5.1 or later
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Check that the tag matches package.json
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $VERSION"
+            exit 1
+          fi
+
+      - name: Download binaries
+        uses: actions/download-artifact@v8
+        with:
+          pattern: prebuilds-*
+          path: prebuilds
+          merge-multiple: true
+
+      - name: List package contents
+        run: |
+          ls -lR prebuilds
+          npm pack --dry-run
+
+      - name: Publish
+        run: npm publish
