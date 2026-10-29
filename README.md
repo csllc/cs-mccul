@@ -1,13 +1,13 @@
 # cs-mccul: Measurement Computing Universal Library
 
-This package provides a NodeJS interface for Measurement Computing's `uldaq` library. It uses native code through N-API and currently supports Linux only. It was developed and tested using NodeJS 24 on Debian 13.
+This package provides a Node.js interface for Measurement Computing's `uldaq` library. It uses native code through N-API and currently supports Linux only. It was developed and tested using Node.js 24 on Debian 13.
 
 ## Installation
 
-Install dependencies:
+Install dependencies. The module is compiled during installation unless a prebuilt binary for your platform is included in the package, so a compiler and the libusb development files are needed (see [Building](#building) for details):
 
 ```bash
-sudo apt install libusb-1.0-0-dev
+sudo apt install build-essential python3 libusb-1.0-0-dev
 ```
 
 Install this package:
@@ -18,13 +18,13 @@ npm install @csllc/cs-mccul
 
 ### Post-installation
 
-Before this library can be executed by non-root users, `udev` rules must be applied to grant permissions. If this module and its submodule is checked out locally, copy the file directly.
+Before this library can be used by non-root users, `udev` rules must be applied to grant permission to access the devices. If this module and its submodule are checked out locally, copy the rules file from the submodule:
 
 ```bash
 sudo cp vendor/uldaq/rules/50-uldaq.rules /lib/udev/rules.d/
 ```
 
-Otherwise it can be obtained directly from the `uldaq` repository: [50-uldaq.rules](https://github.com/mccdaq/uldaq/blob/master/rules/50-uldaq.rules)
+Otherwise, download it from the `uldaq` repository: [50-uldaq.rules](https://github.com/mccdaq/uldaq/blob/master/rules/50-uldaq.rules).
 
 Then reload the rules and apply them:
 
@@ -176,14 +176,14 @@ main().catch(console.error);
 
 ### Conventions
 
-The API follows the `uldaq` C API closely, so the [UL for Linux documentation](https://files.digilent.com/manuals/UL-Linux/c/index.html) applies to it directly. The method name is the C function name without the `ul` prefix, starting with a lower-case letter (`ulAInScan()` becomes `aInScan()`). The arguments are in the same order, except as noted below.
+The API follows the `uldaq` C API closely, so the [UL for Linux documentation](https://files.digilent.com/manuals/UL-Linux/c/index.html) applies to it directly. The method name is the C function name without the `ul` prefix, starting with a lower-case letter (`ulAInScan()` becomes `aInScan()`). The exceptions are `aiGetInfo()` and `dioGetInfo()`, for `ulAIGetInfo()` and `ulDIOGetInfo()`. The arguments are in the same order, except as noted below.
 
 - **Constants**: all enum values are available on `ul.const` (or from `lib/mcculConst.js`), grouped by their C enum name, with the same names and values: for example `ul.const.Range.BIP10VOLTS` and `ul.const.ScanOption.SO_CONTINUOUS`. `ul.const.nameOf(enumObject, value)` returns the name of a value, e.g. `nameOf(Range, 5)` returns `'BIP10VOLTS'`.
 - **Output parameters become return values**: values that the C API returns through a pointer are returned instead. For example, `aIn()` resolves with the reading, and the `*Scan()` methods resolve with the actual scan rate.
 - **Promises and plain return values**: methods that communicate with the device return Promises. Methods that only query information (`*GetInfo()`, `*ScanStatus()`, `getDevInfoHasAi()`) return their result directly.
 - **Device handles** are Numbers.
-- **Errors**: a failed UL call throws (or rejects with) an `Error` whose `code` is the numeric `UlError` value as a string, and whose `message` names the UL function and includes the UL's description of the error. Invalid arguments throw a `TypeError` or `RangeError`.
-- **64-bit values**: digital port and counter values are returned as Numbers, or as BigInts if they exceed `Number.MAX_SAFE_INTEGER`.
+- **Errors**: a failed UL call throws (or rejects with) an `Error` whose `code` is the numeric `UlError` value as a string, and whose `message` names the UL function and includes the UL's description of the error. The exception is `createDaqDevice()`: `ulCreateDaqDevice()` reports failure without an error code, so its `Error` has no `code`. Invalid arguments throw (or reject with) a `TypeError` or `RangeError`.
+- **64-bit values**: `dIn()` and `cIn()` return Numbers, or BigInts if the value exceeds `Number.MAX_SAFE_INTEGER`. Digital and counter scan data is always BigInt, since those scans use a `BigUint64Array` buffer.
 - **Blocking**: calls currently run on Node's main thread and block it until the UL returns. Background scans run independently once started.
 
 ### Scans
