@@ -24,7 +24,7 @@ Before this library can be used by non-root users, `udev` rules must be applied 
 sudo cp vendor/uldaq/rules/50-uldaq.rules /lib/udev/rules.d/
 ```
 
-Otherwise, download it from the `uldaq` repository: [50-uldaq.rules](https://github.com/mccdaq/uldaq/blob/master/rules/50-uldaq.rules).
+Otherwise, download it from the `uldaq` repository: [50-uldaq.rules](https://raw.githubusercontent.com/mccdaq/uldaq/refs/heads/master/rules/50-uldaq.rules).
 
 Then reload the rules and apply them:
 

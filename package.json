@@ -15,11 +15,11 @@
     "vendor/uldaq/LICENSE"
   ],
   "scripts": {
-    "install": "node-gyp-build",
-    "build": "node-gyp build",
-    "rebuild": "node-gyp rebuild",
-    "prebuildify:x64": "prebuildify --napi --strip --arch x64",
-    "prebuildify:arm64": "CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ LINK=aarch64-linux-gnu-g++ AR=aarch64-linux-gnu-ar prebuildify --napi --arch arm64",
+    "install": "JOBS=${JOBS:-max} node-gyp-build",
+    "build": "JOBS=${JOBS:-max} node-gyp build",
+    "rebuild": "JOBS=${JOBS:-max} node-gyp rebuild",
+    "prebuildify:x64": "JOBS=${JOBS:-max} prebuildify --napi --strip --arch x64",
+    "prebuildify:arm64": "JOBS=${JOBS:-max} CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ LINK=aarch64-linux-gnu-g++ AR=aarch64-linux-gnu-ar prebuildify --napi --arch arm64",
     "prebuildify": "npm run prebuildify:x64 && npm run prebuildify:arm64",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
