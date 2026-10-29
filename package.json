@@ -1,8 +1,19 @@
 {
-  "name": "cs-mccul",
+  "name": "@csllc/cs-mccul",
   "version": "0.0.1",
   "description": "MCC Universal Library module for NodeJS",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "lib/",
+    "src/",
+    "tools/",
+    "binding.gyp",
+    "prebuilds/",
+    "vendor/uldaq/src/",
+    "vendor/uldaq/rules/",
+    "vendor/uldaq/LICENSE"
+  ],
   "scripts": {
     "install": "node-gyp-build",
     "build": "node-gyp build",
@@ -27,5 +38,6 @@
     "type": "git",
     "url": "https://github.com/csllc/cs-mccul.git"
   },
-  "gypfile": true
+  "gypfile": true,
+  "publishConfig": { "access": "public" }
 }
