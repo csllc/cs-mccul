@@ -615,10 +615,6 @@ napi_value mccul_getDaqDeviceInventory(napi_env env, napi_callback_info info)
     unsigned int i;
     for (i = 0; i < ul_numDevs; i++)
     {
-#ifdef MCCUL_DEBUG
-        mcculDumpDaqDeviceDescriptor();
-#endif
-
         // Create N-API object for array element
         status = napi_create_object(env, &devDescriptorElement);
         assert(status == napi_ok);

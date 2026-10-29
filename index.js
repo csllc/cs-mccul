@@ -18,24 +18,16 @@ module.exports = class MccUl extends Duplex {
   constructor(options) {
 
     super({ objectMode: true });
-
-    let me = this;
   }
 
   getDaqDeviceInventory(interfaceType) {
-    return new Promise((resolve) => {
-      let devices = mccul.GetDaqDeviceInventory(interfaceType);
-      resolve(devices);
+    return call(mccul.GetDaqDeviceInventory, interfaceType);
       // will resolve with 'devDescriptors', the length of which provides
       // 'numDevs'
-    });
   }
 
   createDaqDevice(devDescriptor) {
-    return new Promise((resolve) => {
-      let devHandle = mccul.CreateDaqDevice(devDescriptor);
-      resolve(devHandle);
-    });
+    return call(mccul.CreateDaqDevice, devDescriptor);
   }
 
   getDevInfoHasAi(devHandle) {
@@ -43,24 +35,15 @@ module.exports = class MccUl extends Duplex {
   }
 
   connectDaqDevice(devHandle) {
-    return new Promise((resolve) => {
-      mccul.ConnectDaqDevice(devHandle);
-      resolve();
-    });
+    return call(mccul.ConnectDaqDevice, devHandle);
   }
 
   disconnectDaqDevice(devHandle) {
-    return new Promise((resolve) => {
-      mccul.DisconnectDaqDevice(devHandle);
-      resolve();
-    });
+    return call(mccul.DisconnectDaqDevice, devHandle);
   }
 
   releaseDaqDevice(devHandle) {
-    return new Promise((resolve) => {
-      mccul.ReleaseDaqDevice(devHandle);
-      resolve();
-    });
+    return call(mccul.ReleaseDaqDevice, devHandle);
   }
 
   // Analog input information; infoItem is a const.AiInfoItem value
@@ -71,9 +54,7 @@ module.exports = class MccUl extends Duplex {
   // Read one analog input channel; resolves with the value (in engineering
   // units unless const.AInFlag.AIN_FF_NOSCALEDATA is set)
   aIn(devHandle, channel, inputMode, range, flags = mcculConst.AInFlag.AIN_FF_DEFAULT) {
-    return new Promise((resolve) => {
-      resolve(mccul.AIn(devHandle, channel, inputMode, range, flags));
-    });
+    return call(mccul.AIn, devHandle, channel, inputMode, range, flags);
   }
 
   // Device information; infoItem is a const.DevInfoItem value
@@ -98,9 +79,7 @@ module.exports = class MccUl extends Duplex {
 
   // Read a digital port; resolves with the port value
   dIn(devHandle, portType) {
-    return new Promise((resolve) => {
-      resolve(mccul.DIn(devHandle, portType));
-    });
+    return call(mccul.DIn, devHandle, portType);
   }
 
   // --- Scans
