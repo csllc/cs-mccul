@@ -1,6 +1,6 @@
 {
   "name": "@csllc/cs-mccul",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "MCC Universal Library module for NodeJS",
   "main": "index.js",
   "files": [
@@ -39,5 +39,7 @@
     "url": "https://github.com/csllc/cs-mccul.git"
   },
   "gypfile": true,
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
