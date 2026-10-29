@@ -62,6 +62,8 @@ jobs:
 
       - name: Build prebuilt binary
         run: npx prebuildify --napi --strip
+        env:
+          JOBS: max   # one compile job per CPU
 
       # Load the prebuilt binary (not build/Release) to check that it links
       # and initializes, and that the expected functions are exported. No DAQ
